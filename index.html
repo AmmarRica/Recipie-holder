@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Holder</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .recording {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            color: #2c5282;
+            display: block;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            display: block;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            display: block;
+        }
+
+        .recipe-display {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f7fafc;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            display: none;
+        }
+
+        .recipe-display.show {
+            display: block;
+        }
+
+        .recipe-display h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .recipe-display h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .recipe-display ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recipe-display ul li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .recipe-display ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .recipe-display p {
+            line-height: 1.8;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .instructions-list {
+            counter-reset: step-counter;
+        }
+
+        .instructions-list p {
+            counter-increment: step-counter;
+            padding-left: 35px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .instructions-list p:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            background: #667eea;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #718096;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .mic-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .form-group, .button-group, .status {
+                display: none !important;
+            }
+            .recipe-display {
+                display: block !important;
+                border: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍳 Recipe Holder</h1>
+        <p class="subtitle">Quick recipe creation with voice-to-text support</p>
+
+        <div id="status" class="status"></div>
+
+        <div class="form-group">
+            <label for="recipeName">Recipe Name</label>
+            <input type="text" id="recipeName" placeholder="Enter recipe name...">
+            <div class="button-group" style="margin-top: 10px;">
+                <button id="recordName" class="btn-secondary">
+                    <span class="mic-icon">🎤</span> Record Name
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="ingredients">Ingredients</label>
+            <textarea id="ingredients" placeholder="Enter ingredients (one per line or comma-separated)..."></textarea>
+            <p class="help-text">Tip: Add one ingredient per line or separate with commas</p>
+            <div class="button-group" style="margin-top: 10px;">
+                <button id="recordIngredients" class="btn-secondary">
+                    <span class="mic-icon">🎤</span> Record Ingredients
+                </button>
+                <button id="formatIngredients" class="btn-outline">✨ Auto-Format List</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="instructions">Instructions</label>
+            <textarea id="instructions" placeholder="Enter cooking instructions..."></textarea>
+            <p class="help-text">Tip: Separate steps with periods or line breaks</p>
+            <div class="button-group" style="margin-top: 10px;">
+                <button id="recordInstructions" class="btn-secondary">
+                    <span class="mic-icon">🎤</span> Record Instructions
+                </button>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="saveRecipe" class="btn-primary">💾 Save & Preview Recipe</button>
+            <button id="clearForm" class="btn-danger">🗑️ Clear Form</button>
+        </div>
+
+        <div id="recipeDisplay" class="recipe-display">
+            <!-- Recipe preview will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // Check if browser supports speech recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+        }
+
+        // Status message helper
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.className = 'status';
+                }, 3000);
+            }
+        }
+
+        // Voice recording functionality
+        let currentRecordingTarget = null;
+        let recordingButton = null;
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        function startRecording(targetElement, button) {
+            if (!recognition) {
+                showStatus('Speech recognition is not supported in your browser. Please use Chrome or Edge.', 'error');
+                return;
+            }
+
+            currentRecordingTarget = targetElement;
+            recordingButton = button;
+            interimTranscript = '';
+            finalTranscript = targetElement.value;
+
+            recognition.start();
+            button.classList.add('recording');
+            button.textContent = '⏹️ Stop Recording';
+            showStatus('Recording... Speak now!', 'info');
+        }
+
+        function stopRecording() {
+            if (recognition && currentRecordingTarget) {
+                recognition.stop();
+                recordingButton.classList.remove('recording');
+                const buttonText = recordingButton.id.includes('Name') ? '🎤 Record Name' :
+                                   recordingButton.id.includes('Ingredients') ? '🎤 Record Ingredients' :
+                                   '🎤 Record Instructions';
+                recordingButton.textContent = buttonText;
+                showStatus('Recording stopped!', 'success');
+            }
+        }
+
+        if (recognition) {
+            recognition.onresult = (event) => {
+                interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += (finalTranscript ? ' ' : '') + transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                if (currentRecordingTarget) {
+                    currentRecordingTarget.value = finalTranscript + (interimTranscript ? ' ' + interimTranscript : '');
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                if (event.error === 'no-speech') {
+                    showStatus('No speech detected. Please try again.', 'error');
+                } else if (event.error === 'not-allowed') {
+                    showStatus('Microphone access denied. Please allow microphone access.', 'error');
+                } else {
+                    showStatus('Error: ' + event.error, 'error');
+                }
+                stopRecording();
+            };
+
+            recognition.onend = () => {
+                if (recordingButton && recordingButton.classList.contains('recording')) {
+                    // If still showing as recording, it ended unexpectedly, restart it
+                    recognition.start();
+                }
+            };
+        }
+
+        // Record buttons event listeners
+        document.getElementById('recordName').addEventListener('click', function() {
+            const nameInput = document.getElementById('recipeName');
+            if (this.classList.contains('recording')) {
+                stopRecording();
+            } else {
+                startRecording(nameInput, this);
+            }
+        });
+
+        document.getElementById('recordIngredients').addEventListener('click', function() {
+            const ingredientsInput = document.getElementById('ingredients');
+            if (this.classList.contains('recording')) {
+                stopRecording();
+            } else {
+                startRecording(ingredientsInput, this);
+            }
+        });
+
+        document.getElementById('recordInstructions').addEventListener('click', function() {
+            const instructionsInput = document.getElementById('instructions');
+            if (this.classList.contains('recording')) {
+                stopRecording();
+            } else {
+                startRecording(instructionsInput, this);
+            }
+        });
+
+        // Format ingredients into a clean list
+        document.getElementById('formatIngredients').addEventListener('click', function() {
+            const ingredientsText = document.getElementById('ingredients').value;
+            if (!ingredientsText.trim()) {
+                showStatus('Please enter ingredients first!', 'error');
+                return;
+            }
+
+            // Split by newlines or commas
+            let ingredients = ingredientsText.split(/\n|,/).map(item => item.trim()).filter(item => item);
+            
+            // Remove common prefixes like numbers, dashes, bullets
+            ingredients = ingredients.map(item => {
+                return item.replace(/^[\d\-•*]\s*\.?\s*/, '').trim();
+            });
+
+            // Remove duplicates
+            ingredients = [...new Set(ingredients)];
+
+            // Join with newlines
+            document.getElementById('ingredients').value = ingredients.join('\n');
+            showStatus('Ingredients formatted!', 'success');
+        });
+
+        // Save and preview recipe
+        document.getElementById('saveRecipe').addEventListener('click', function() {
+            const name = document.getElementById('recipeName').value.trim();
+            const ingredients = document.getElementById('ingredients').value.trim();
+            const instructions = document.getElementById('instructions').value.trim();
+
+            if (!name || !ingredients || !instructions) {
+                showStatus('Please fill in all fields!', 'error');
+                return;
+            }
+
+            // Parse ingredients
+            const ingredientsList = ingredients.split('\n').map(item => item.trim()).filter(item => item);
+
+            // Parse instructions (split by periods or newlines)
+            let instructionsList = instructions.split(/\.\s+|\n+/).map(item => item.trim()).filter(item => item);
+            // Add periods back if they don't have them
+            instructionsList = instructionsList.map(item => item.endsWith('.') ? item : item + '.');
+
+            // Generate recipe display
+            let html = `
+                <h2>${escapeHtml(name)}</h2>
+                <h3>Ingredients</h3>
+                <ul>
+                    ${ingredientsList.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
+                </ul>
+                <h3>Instructions</h3>
+                <div class="instructions-list">
+                    ${instructionsList.map(item => `<p>${escapeHtml(item)}</p>`).join('')}
+                </div>
+            `;
+
+            const recipeDisplay = document.getElementById('recipeDisplay');
+            recipeDisplay.innerHTML = html;
+            recipeDisplay.classList.add('show');
+
+            showStatus('Recipe saved and previewed!', 'success');
+            
+            // Scroll to preview
+            recipeDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+
+        // Clear form
+        document.getElementById('clearForm').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear the form?')) {
+                document.getElementById('recipeName').value = '';
+                document.getElementById('ingredients').value = '';
+                document.getElementById('instructions').value = '';
+                document.getElementById('recipeDisplay').classList.remove('show');
+                showStatus('Form cleared!', 'success');
+            }
+        });
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Show browser support status
+        if (!recognition) {
+            showStatus('Voice recording is not supported in your browser. Text input still works!', 'info');
+        }
+    </script>
+</body>
+</html>
